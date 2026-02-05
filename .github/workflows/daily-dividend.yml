@@ -12,30 +12,5 @@ jobs:
     steps:
       - name: Call dividend endpoint with retry
         run: |
-          MAX_RETRIES=3
-          RETRY_DELAY=3600
-
-          attempt=1
-
-          while [ $attempt -le $MAX_RETRIES ]; do
-            echo "Attempt $attempt of $MAX_RETRIES"
-
-            response=$(curl -s -o /dev/null -w "%{http_code}" -X POST https://divapp.fastapicloud.dev/div2pg/div_dailyrun)
-
-            if [ "$response" -eq 200 ]; then
-              echo "Daily dividend job triggered successfully"
-              exit 0
-            fi
-
-            echo "Attempt $attempt failed. HTTP $response"
-
-            if [ $attempt -lt $MAX_RETRIES ]; then
-              echo "Waiting 1 hour before retry..."
-              sleep $RETRY_DELAY
-            fi
-
-            attempt=$((attempt + 1))
-          done
-
-          echo "All retry attempts failed"
-          exit 1
+          curl -s -X POST https://divapp.fastapicloud.dev/div2pg/div_dailyrun >/dev/null 2>&1 &
+          echo "Daily dividend job triggered (async, not waiting for completion)"
